@@ -112,7 +112,7 @@ function SidebarContent({
   return (
     <>
       {/* Header: when collapsed show only toggle button; when expanded show logo + name + subtitle + toggle */}
-      <div className="flex h-16 shrink-0 items-center justify-between gap-2 border-b border-border px-3">
+      <div className="flex h-16 shrink-0 items-center justify-between gap-2 border-b border-border px-4">
         {collapsed ? (
           onToggle ? (
             <Button
@@ -165,13 +165,13 @@ function SidebarContent({
 
       {/* Search: on mobile use inline input; on desktop open modal */}
       {!collapsed && (
-        <div className="px-3 py-3">
+        <div className="px-4 py-4">
           {/* Mobile: real search input (no popup) */}
           <div className="relative md:hidden">
             <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground pointer-events-none" />
             <Input
               placeholder="Search apps and mo..."
-              className="h-9 rounded-lg bg-muted/50 pl-9"
+              className="h-9 rounded-lg border-2 border-border bg-muted/50 pl-9"
               aria-label="Search"
             />
           </div>
@@ -179,7 +179,7 @@ function SidebarContent({
           <button
             type="button"
             onClick={() => setSearchOpen(true)}
-            className="relative hidden h-9 w-full items-center gap-2 overflow-hidden rounded-lg bg-muted/50 pl-9 pr-2 text-left text-sm text-muted-foreground transition-colors hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-ring md:flex"
+            className="relative hidden h-10 w-full items-center gap-2 overflow-hidden rounded-lg border-2 border-border bg-muted/50 pl-9 pr-2 text-left text-sm text-muted-foreground transition-colors hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-ring md:flex"
             aria-label="Open search"
           >
             <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 shrink-0 text-muted-foreground pointer-events-none" />
@@ -201,12 +201,12 @@ function SidebarContent({
       {/* Navigation */}
       <nav
         className={cn(
-          "flex-1 space-y-1 overflow-y-auto px-2 pb-4",
+          "flex-1 space-y-0.5 overflow-y-auto px-4 pb-6",
           collapsed && "pt-2"
         )}
       >
         {!collapsed && (
-          <p className="px-3 py-1.5 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+          <p className="mb-2 px-1 py-2.5 text-xs font-medium uppercase tracking-wider text-muted-foreground">
             Navigation
           </p>
         )}
@@ -219,7 +219,7 @@ function SidebarContent({
               href={item.href}
               onClick={handleLinkClick}
               className={cn(
-                "flex min-h-[44px] items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors md:min-h-0",
+                "flex min-h-[44px] items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors md:min-h-[40px]",
                 active
                   ? "bg-primary/10 text-primary"
                   : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
@@ -256,7 +256,7 @@ function SidebarContent({
               }
             }}
             className={cn(
-              "flex min-h-[44px] w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground md:min-h-0",
+              "flex min-h-[44px] w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground md:min-h-[40px]",
               collapsed && "justify-center px-2"
             )}
           >
@@ -272,18 +272,18 @@ function SidebarContent({
           </CollapsibleTrigger>
           <CollapsibleContent>
             {!collapsed && (
-              <div className="ml-4 mt-1 space-y-0.5 border-l border-border pl-2">
+              <div className="ml-4 mt-2 space-y-1 border-l border-border pl-3">
                 <Link
                   href="/categories"
                   onClick={handleLinkClick}
-                  className="block rounded-md px-2 py-1.5 text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                  className="block rounded-md px-2 py-2 text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground"
                 >
                   Categories
                 </Link>
                 <Link
                   href="/brands"
                   onClick={handleLinkClick}
-                  className="block rounded-md px-2 py-1.5 text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                  className="block rounded-md px-2 py-2 text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground"
                 >
                   Brands
                 </Link>
@@ -302,7 +302,7 @@ function SidebarContent({
               }
             }}
             className={cn(
-              "flex min-h-[44px] w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground md:min-h-0",
+              "flex min-h-[44px] w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground md:min-h-[40px]",
               collapsed && "justify-center px-2"
             )}
           >
@@ -318,11 +318,11 @@ function SidebarContent({
           </CollapsibleTrigger>
           <CollapsibleContent>
             {!collapsed && (
-              <div className="ml-4 mt-1 space-y-0.5 border-l border-border pl-2">
+              <div className="ml-4 mt-2 space-y-1 border-l border-border pl-3">
                 <Link
                   href="/contacts"
                   onClick={handleLinkClick}
-                  className="block rounded-md px-2 py-1.5 text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                  className="block rounded-md px-2 py-2 text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground"
                 >
                   Contacts
                 </Link>
@@ -333,12 +333,12 @@ function SidebarContent({
       </nav>
 
       {/* User card */}
-      <div className="shrink-0 border-t border-border p-3">
+      <div className="shrink-0 border-t border-border p-4">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button
               className={cn(
-                "flex w-full items-center gap-3 rounded-lg p-2 text-left transition-colors hover:bg-accent",
+                "flex w-full items-center gap-3 rounded-lg p-3 text-left transition-colors hover:bg-accent",
                 collapsed && "justify-center"
               )}
               aria-label="User menu"
@@ -409,7 +409,7 @@ export default function Sidebar({ collapsed, onToggle, onNavigate }: SidebarProp
     <aside
       className={cn(
         "fixed left-0 top-0 z-40 hidden h-screen flex-col border-r border-border bg-background transition-[width] duration-300 md:flex",
-        collapsed ? "w-16" : "w-64"
+        collapsed ? "w-16" : "w-72"
       )}
     >
       <SidebarContent

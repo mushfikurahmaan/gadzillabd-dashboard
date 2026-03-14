@@ -59,7 +59,7 @@ export default function DashboardLayout({
 
       <div
         className={`min-h-screen border-t border-border transition-[margin] duration-300 ${
-          collapsed ? "md:ml-16" : "md:ml-64"
+          collapsed ? "md:ml-16" : "md:ml-72"
         }`}
       >
         {/* Mobile: top bar with hamburger */}
