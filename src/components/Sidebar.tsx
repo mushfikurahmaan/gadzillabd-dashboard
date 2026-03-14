@@ -376,12 +376,6 @@ function SidebarContent({
                 View site
               </a>
             </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <button className="flex w-full cursor-pointer items-center gap-2">
-                <KeyRound className="size-4" />
-                Change password
-              </button>
-            </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem
               variant="destructive"

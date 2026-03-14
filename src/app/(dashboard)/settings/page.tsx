@@ -5,7 +5,6 @@ import api from "@/lib/api";
 import { useBranding, defaultBranding } from "@/context/BrandingContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 function logoUrl(url: string | null): string | null {
   if (!url) return null;
@@ -73,102 +72,101 @@ export default function SettingsPage() {
         Set your dashboard logo, admin name, and subtitle. These appear in the sidebar header.
       </p>
 
-      <form onSubmit={handleSubmit}>
-        <Card className="max-w-xl">
-          <CardHeader>
-            <CardTitle>Sidebar branding</CardTitle>
-            <CardDescription>Logo is shown rounded in the sidebar and mobile header.</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            {/* Logo */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                Logo
-              </label>
-              <div className="flex flex-wrap items-center gap-4">
-                {previewUrl && !clearLogo ? (
-                  <div className="relative size-20 overflow-hidden rounded-full border border-border bg-muted">
-                    <img
-                      src={previewUrl}
-                      alt="Logo preview"
-                      className="size-full object-cover"
-                    />
-                  </div>
-                ) : (
-                  <div className="flex size-20 items-center justify-center rounded-full border border-dashed border-border bg-muted text-muted-foreground">
-                    No logo
-                  </div>
-                )}
-                <div className="flex flex-col gap-2">
+      <form onSubmit={handleSubmit} className="max-w-xl space-y-6">
+        <div>
+          <h2 className="text-lg font-semibold text-foreground">Sidebar branding</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Logo is shown rounded in the sidebar and mobile header.
+          </p>
+        </div>
+
+        {/* Logo */}
+        <div className="space-y-2">
+          <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+            Logo
+          </label>
+          <div className="flex flex-wrap items-center gap-4">
+            {previewUrl && !clearLogo ? (
+              <div className="relative size-20 overflow-hidden rounded-full border border-border bg-muted">
+                <img
+                  src={previewUrl}
+                  alt="Logo preview"
+                  className="size-full object-cover"
+                />
+              </div>
+            ) : (
+              <div className="flex size-20 items-center justify-center rounded-full border border-dashed border-border bg-muted text-muted-foreground">
+                No logo
+              </div>
+            )}
+            <div className="flex flex-col gap-2">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="text-sm file:mr-2 file:rounded-md file:border-0 file:bg-primary file:px-3 file:py-1.5 file:text-primary-foreground"
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  setLogoFile(f || null);
+                  if (f) setClearLogo(false);
+                }}
+              />
+              {currentLogoUrl && (
+                <label className="flex items-center gap-2 text-sm">
                   <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*"
-                    className="text-sm file:mr-2 file:rounded-md file:border-0 file:bg-primary file:px-3 file:py-1.5 file:text-primary-foreground"
+                    type="checkbox"
+                    checked={clearLogo}
                     onChange={(e) => {
-                      const f = e.target.files?.[0];
-                      setLogoFile(f || null);
-                      if (f) setClearLogo(false);
+                      setClearLogo(e.target.checked);
+                      if (e.target.checked) setLogoFile(null);
                     }}
                   />
-                  {currentLogoUrl && (
-                    <label className="flex items-center gap-2 text-sm">
-                      <input
-                        type="checkbox"
-                        checked={clearLogo}
-                        onChange={(e) => {
-                          setClearLogo(e.target.checked);
-                          if (e.target.checked) setLogoFile(null);
-                        }}
-                      />
-                      Remove logo
-                    </label>
-                  )}
-                </div>
-              </div>
+                  Remove logo
+                </label>
+              )}
             </div>
+          </div>
+        </div>
 
-            <div className="space-y-2">
-              <label htmlFor="admin_name" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                Admin name
-              </label>
-              <Input
-                id="admin_name"
-                value={adminName}
-                onChange={(e) => setAdminName(e.target.value)}
-                placeholder="e.g. Gadzilla"
-                className="max-w-md"
-              />
-            </div>
+        <div className="flex flex-col gap-2">
+          <label htmlFor="admin_name" className="text-sm font-medium leading-normal text-foreground">
+            Admin name
+          </label>
+          <Input
+            id="admin_name"
+            value={adminName}
+            onChange={(e) => setAdminName(e.target.value)}
+            placeholder="e.g. Gadzilla"
+            className="w-full max-w-md"
+          />
+        </div>
 
-            <div className="space-y-2">
-              <label htmlFor="admin_subtitle" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                Admin subtitle
-              </label>
-              <Input
-                id="admin_subtitle"
-                value={adminSubtitle}
-                onChange={(e) => setAdminSubtitle(e.target.value)}
-                placeholder="e.g. Admin dashboard"
-                className="max-w-md"
-              />
-            </div>
+        <div className="flex flex-col gap-2">
+          <label htmlFor="admin_subtitle" className="text-sm font-medium leading-normal text-foreground">
+            Admin subtitle
+          </label>
+          <Input
+            id="admin_subtitle"
+            value={adminSubtitle}
+            onChange={(e) => setAdminSubtitle(e.target.value)}
+            placeholder="e.g. Admin dashboard"
+            className="w-full max-w-md"
+          />
+        </div>
 
-            {message && (
-              <p
-                className={
-                  message.type === "success" ? "text-sm text-green-600" : "text-sm text-destructive"
-                }
-              >
-                {message.text}
-              </p>
-            )}
+        {message && (
+          <p
+            className={
+              message.type === "success" ? "text-sm text-green-600" : "text-sm text-destructive"
+            }
+          >
+            {message.text}
+          </p>
+        )}
 
-            <Button type="submit" disabled={saving}>
-              {saving ? "Saving…" : "Save branding"}
-            </Button>
-          </CardContent>
-        </Card>
+        <Button type="submit" disabled={saving}>
+          {saving ? "Saving…" : "Save branding"}
+        </Button>
       </form>
     </div>
   );
