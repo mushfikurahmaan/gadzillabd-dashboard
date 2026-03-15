@@ -17,6 +17,7 @@ export default function SettingsPage() {
   const { branding, isLoading, refetch } = useBranding();
   const [adminName, setAdminName] = useState(defaultBranding.admin_name);
   const [adminSubtitle, setAdminSubtitle] = useState(defaultBranding.admin_subtitle);
+  const [currencySymbol, setCurrencySymbol] = useState(defaultBranding.currency_symbol);
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [clearLogo, setClearLogo] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -27,6 +28,7 @@ export default function SettingsPage() {
     if (branding) {
       setAdminName(branding.admin_name);
       setAdminSubtitle(branding.admin_subtitle);
+      setCurrencySymbol(branding.currency_symbol ?? defaultBranding.currency_symbol);
     }
   }, [branding]);
 
@@ -41,6 +43,7 @@ export default function SettingsPage() {
       const formData = new FormData();
       formData.append("admin_name", adminName || defaultBranding.admin_name);
       formData.append("admin_subtitle", adminSubtitle || defaultBranding.admin_subtitle);
+      formData.append("currency_symbol", (currencySymbol || defaultBranding.currency_symbol).trim().slice(0, 10));
       if (logoFile) formData.append("logo", logoFile);
       if (clearLogo) formData.append("clear_logo", "true");
 
@@ -67,7 +70,7 @@ export default function SettingsPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-foreground">Branding</h1>
+      <h1 className="text-2xl font-semibold text-foreground">Branding</h1>
       <p className="text-muted-foreground">
         Set your dashboard logo, admin name, and subtitle. These appear in the sidebar header.
       </p>
@@ -152,6 +155,23 @@ export default function SettingsPage() {
             placeholder="e.g. Admin dashboard"
             className="w-full max-w-md"
           />
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <label htmlFor="currency_symbol" className="text-sm font-medium leading-normal text-foreground">
+            Currency symbol
+          </label>
+          <Input
+            id="currency_symbol"
+            value={currencySymbol}
+            onChange={(e) => setCurrencySymbol(e.target.value)}
+            placeholder="e.g. ৳, $, €"
+            className="w-full max-w-[8rem]"
+            maxLength={10}
+          />
+          <p className="text-xs text-muted-foreground">
+            Used in front of all prices across the dashboard (orders, products, etc.).
+          </p>
         </div>
 
         {message && (

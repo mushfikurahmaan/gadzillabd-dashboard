@@ -21,9 +21,7 @@ import {
   KeyRound,
   Palette,
 } from "lucide-react";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
@@ -163,19 +161,10 @@ function SidebarContent({
         )}
       </div>
 
-      {/* Search: on mobile use inline input; on desktop open modal */}
+      {/* Search: on mobile handled by top-bar icon; on desktop open modal */}
       {!collapsed && (
-        <div className="px-4 py-4">
-          {/* Mobile: real search input (no popup) */}
-          <div className="relative md:hidden">
-            <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground pointer-events-none" />
-            <Input
-              placeholder="Search apps and mo..."
-              className="h-9 rounded-lg border-2 border-border bg-muted/50 pl-9"
-              aria-label="Search"
-            />
-          </div>
-          {/* Desktop: trigger opens search modal */}
+        <div className="hidden px-4 py-4 md:block">
+          {/* Desktop: trigger opens search modal (mobile uses top-bar search icon) */}
           <button
             type="button"
             onClick={() => setSearchOpen(true)}
@@ -332,7 +321,7 @@ function SidebarContent({
         </Collapsible>
       </nav>
 
-      {/* User card */}
+      {/* User menu (no avatar) */}
       <div className="shrink-0 border-t border-border p-4">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -343,11 +332,6 @@ function SidebarContent({
               )}
               aria-label="User menu"
             >
-              <Avatar className="size-9 shrink-0">
-                <AvatarFallback className="bg-primary/10 text-primary text-sm font-medium">
-                  SE
-                </AvatarFallback>
-              </Avatar>
               {!collapsed && (
                 <>
                   <div className="min-w-0 flex-1">
@@ -361,6 +345,7 @@ function SidebarContent({
                   <ChevronDown className="size-4 shrink-0 text-muted-foreground" />
                 </>
               )}
+              {collapsed && <ChevronDown className="size-4 shrink-0 text-muted-foreground" />}
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" className="w-56" side="top">

@@ -21,7 +21,7 @@ export default function StatsCard({
   return (
     <div className="rounded-xl border border-gray-200 bg-white p-5">
       <p className="text-sm font-medium text-gray-500">{title}</p>
-      <p className={`mt-2 text-3xl font-bold ${ACCENT_CLASSES[accent].split(" ")[1]}`}>
+      <p className={`mt-2 text-3xl font-bold font-mono tabular-nums ${ACCENT_CLASSES[accent].split(" ")[1]}`}>
         {value}
       </p>
       {subtitle && (

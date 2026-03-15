@@ -2,16 +2,19 @@ export interface Branding {
   logo_url: string | null;
   admin_name: string;
   admin_subtitle: string;
+  currency_symbol: string;
 }
 
 export interface OrderItem {
   id: number;
   product: string;
   product_name: string;
+  product_brand?: string;
   product_image: string | null;
   quantity: number;
   size: string;
   price: string;
+  original_price?: string | null;
 }
 
 export interface Order {

@@ -150,7 +150,7 @@ export default function CategoriesPage() {
 
   return (
     <div className="space-y-8">
-      <h1 className="text-2xl font-bold text-gray-900">Categories</h1>
+      <h1 className="text-2xl font-semibold text-gray-900">Categories</h1>
 
       {/* ── Navbar Categories ── */}
       <section>

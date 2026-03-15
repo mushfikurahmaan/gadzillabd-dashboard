@@ -15,12 +15,15 @@ interface BrandingState {
   branding: Branding | null;
   isLoading: boolean;
   refetch: () => Promise<void>;
+  /** Resolved currency symbol for prices (from branding or default). */
+  currencySymbol: string;
 }
 
 const defaultBranding: Branding = {
   logo_url: null,
   admin_name: "Gadzilla",
   admin_subtitle: "Admin dashboard",
+  currency_symbol: "৳",
 };
 
 const BrandingContext = createContext<BrandingState | undefined>(undefined);
@@ -44,8 +47,10 @@ export function BrandingProvider({ children }: { children: ReactNode }) {
     fetchBranding();
   }, [fetchBranding]);
 
+  const currencySymbol = branding?.currency_symbol ?? defaultBranding.currency_symbol;
+
   return (
-    <BrandingContext.Provider value={{ branding, isLoading, refetch: fetchBranding }}>
+    <BrandingContext.Provider value={{ branding, isLoading, refetch: fetchBranding, currencySymbol }}>
       {children}
     </BrandingContext.Provider>
   );

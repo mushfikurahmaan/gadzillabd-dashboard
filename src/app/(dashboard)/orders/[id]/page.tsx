@@ -1,15 +1,29 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
+import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
+import {
+  Undo2,
+  CreditCard,
+  User,
+  Package,
+  Home,
+  PackageOpen,
+  Truck,
+  CheckCircle2,
+} from "lucide-react";
 import api from "@/lib/api";
-import type { Order } from "@/types";
-
-const STATUS_OPTIONS = [
-  { value: "pending", label: "Pending" },
-  { value: "confirmed", label: "Confirmed" },
-  { value: "cancelled", label: "Cancelled" },
-];
+import { useBranding } from "@/context/BrandingContext";
+import type { Order, OrderItem } from "@/types";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from "@/components/ui/card";
 
 const DELIVERY_OPTIONS = [
   { value: "inside", label: "Inside Dhaka City" },
@@ -26,20 +40,72 @@ type EditForm = {
   tracking_number: string;
 };
 
+function resolveImageUrl(url: string | null | undefined): string | null {
+  if (!url) return null;
+  if (url.startsWith("http")) return url;
+  const base = process.env.NEXT_PUBLIC_API_URL || "";
+  return base ? `${base.replace(/\/$/, "")}${url.startsWith("/") ? "" : "/"}${url}` : url;
+}
+
+function formatOrderDate(iso: string) {
+  const d = new Date(iso);
+  const month = d.toLocaleString("en-US", { month: "long" });
+  const day = d.getDate();
+  const year = d.getFullYear();
+  const time = d.toLocaleTimeString("en-US", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  }).toLowerCase().replace(/\s/g, " ");
+  return `${month}, ${day} ${year} at ${time}`;
+}
+
+function buildTimelineEvents(order: Order): { icon: typeof Package; text: string; by?: string; date: string }[] {
+  const events: { icon: typeof Package; text: string; by?: string; date: string }[] = [];
+  events.push({
+    icon: PackageOpen,
+    text: "Order placed",
+    by: "customer",
+    date: order.created_at,
+  });
+  if (order.status === "confirmed" && order.updated_at !== order.created_at) {
+    events.push({
+      icon: CheckCircle2,
+      text: "Order confirmed",
+      by: "Admin",
+      date: order.updated_at,
+    });
+  }
+  if (order.tracking_number) {
+    events.push({
+      icon: Truck,
+      text: "Tracking number assigned",
+      date: order.updated_at,
+    });
+  }
+  events.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  return events;
+}
+
 export default function OrderDetailPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
+  const { currencySymbol } = useBranding();
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
-  const [updating, setUpdating] = useState(false);
-
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState<EditForm>({
-    shipping_name: "", phone: "", email: "",
-    shipping_address: "", district: "", delivery_area: "inside",
+    shipping_name: "",
+    phone: "",
+    email: "",
+    shipping_address: "",
+    district: "",
+    delivery_area: "inside",
     tracking_number: "",
   });
   const [saving, setSaving] = useState(false);
+  const rightColRef = useRef<HTMLDivElement>(null);
+  const [rightColHeight, setRightColHeight] = useState<number | null>(null);
 
   useEffect(() => {
     api
@@ -48,6 +114,26 @@ export default function OrderDetailPage() {
       .catch(console.error)
       .finally(() => setLoading(false));
   }, [id]);
+
+  // Match Product card height to Payment + Customer combined on desktop
+  useEffect(() => {
+    const el = rightColRef.current;
+    if (!el) return;
+    const isDesktop = () => window.matchMedia("(min-width: 1024px)").matches;
+    const updateHeight = () => {
+      if (isDesktop()) setRightColHeight(el.offsetHeight);
+      else setRightColHeight(null);
+    };
+    updateHeight();
+    const ro = new ResizeObserver(updateHeight);
+    ro.observe(el);
+    const mql = window.matchMedia("(min-width: 1024px)");
+    mql.addEventListener("change", updateHeight);
+    return () => {
+      ro.disconnect();
+      mql.removeEventListener("change", updateHeight);
+    };
+  }, [order]);
 
   function startEditing() {
     if (!order) return;
@@ -77,21 +163,6 @@ export default function OrderDetailPage() {
     }
   }
 
-  async function updateStatus(status: string) {
-    setUpdating(true);
-    try {
-      const { data } = await api.patch<Order>(
-        `/api/admin/orders/${id}/status/`,
-        { status }
-      );
-      setOrder(data);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setUpdating(false);
-    }
-  }
-
   async function handleDelete() {
     if (!confirm("Delete this order permanently?")) return;
     try {
@@ -105,200 +176,446 @@ export default function OrderDetailPage() {
   if (loading) {
     return (
       <div className="flex h-64 items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-600 border-t-transparent" />
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
       </div>
     );
   }
 
-  if (!order) return <p className="text-gray-500">Order not found.</p>;
+  if (!order) {
+    return (
+      <p className="text-muted-foreground">Order not found.</p>
+    );
+  }
+
+  const orderDateFormatted = formatOrderDate(order.created_at);
+  const subtotal = (order.items ?? []).reduce(
+    (s, i) => s + Number(i.price) * i.quantity,
+    0
+  );
+  const totalNum = Number(order.total);
+  const combinedDiscount = (order.items ?? []).reduce((sum, i) => {
+    const orig = i.original_price != null && i.original_price !== "" ? Number(i.original_price) : 0;
+    const p = Number(i.price);
+    if (orig > p) return sum + (orig - p) * i.quantity;
+    return sum;
+  }, 0);
+  const shippingCost =
+    order.delivery_area === "outside" ? 150 : order.delivery_area === "inside" ? 60 : 0;
+  const timelineEvents = buildTimelineEvents(order);
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <button
-            onClick={() => router.back()}
-            className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50"
-          >
-            &larr; Back
-          </button>
-          <h1 className="text-2xl font-bold text-gray-900">
-            Order {order.order_number}
-          </h1>
+      {/* Header */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center gap-3">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => router.back()}
+              aria-label="Go back"
+              className="size-10 shrink-0 cursor-pointer rounded-xl border-border bg-white shadow-sm hover:bg-muted/50 hover:border-border"
+            >
+              <Undo2 className="size-5 text-foreground" />
+            </Button>
+            <h1 className="text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
+              #S-{order.order_number}
+            </h1>
+          </div>
+          <nav className="flex flex-wrap items-center gap-1 text-sm text-muted-foreground">
+            <Link
+              href="/orders"
+              className="hover:text-foreground hover:underline"
+            >
+              Orders
+            </Link>
+            <span aria-hidden>/</span>
+            <span>
+              S-{order.order_number} – {orderDateFormatted}
+            </span>
+          </nav>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleDelete}
+            className="rounded-lg border-destructive text-destructive hover:bg-destructive/10"
+          >
+            Delete Order
+          </Button>
           {!editing && (
-            <button
+            <Button
+              size="sm"
               onClick={startEditing}
-              className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+              className="rounded-lg"
             >
               Edit Order
-            </button>
+            </Button>
           )}
-          <button
-            onClick={handleDelete}
-            className="rounded-lg border border-red-300 px-4 py-2 text-sm font-semibold text-red-600 hover:bg-red-50"
-          >
-            Delete
-          </button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        <div className="col-span-2 space-y-6">
-          {/* Items (always read-only) */}
-          <div className="rounded-xl border border-gray-200 bg-white p-5">
-            <h2 className="mb-4 font-semibold text-gray-900">Items</h2>
-            <div className="divide-y divide-gray-100">
-              {order.items?.map((item) => (
-                <div key={item.id} className="flex items-center gap-4 py-3">
-                  {item.product_image && (
-                    <img
-                      src={item.product_image}
-                      alt={item.product_name}
-                      className="h-12 w-12 rounded-lg object-cover"
-                    />
-                  )}
-                  <div className="flex-1">
-                    <p className="font-medium text-gray-900">{item.product_name}</p>
-                    {item.size && <p className="text-sm text-gray-500">Size: {item.size}</p>}
-                  </div>
-                  <p className="text-sm text-gray-500">x{item.quantity}</p>
-                  <p className="font-medium text-gray-900">৳{Number(item.price).toLocaleString()}</p>
-                </div>
-              ))}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3 lg:items-start">
+        {/* Product - left, wider; height locked to Payment + Customer combined on desktop; scrolls when many items */}
+        <Card
+          className="flex min-h-0 flex-col overflow-hidden rounded-xl border bg-card shadow-sm lg:col-span-2"
+          style={rightColHeight !== null ? { height: rightColHeight } : undefined}
+        >
+          <CardHeader className="shrink-0 border-b border-border/50 px-4 pb-4 sm:px-6">
+            <CardTitle>Product</CardTitle>
+            <CardDescription>product details</CardDescription>
+          </CardHeader>
+          <CardContent className="min-h-0 flex-1 overflow-auto px-4 pt-6 sm:px-6 [scrollbar-width:thin] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-none [&::-webkit-scrollbar-thumb]:bg-border [&::-webkit-scrollbar-track]:bg-transparent">
+            <div className="overflow-x-auto [scrollbar-width:thin] [&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar-thumb]:rounded-none [&::-webkit-scrollbar-thumb]:bg-border [&::-webkit-scrollbar-track]:bg-transparent">
+            <table className="w-full min-w-[600px] text-left text-sm">
+              <thead>
+                <tr className="border-b border-border">
+                  <th className="pb-3 pr-4 font-medium text-muted-foreground">
+                    Item
+                  </th>
+                  <th className="pb-3 pr-4 font-medium text-muted-foreground">
+                    Quantity
+                  </th>
+                  <th className="pb-3 pr-4 font-medium text-muted-foreground">
+                    Price
+                  </th>
+                  <th className="pb-3 font-medium text-muted-foreground text-right">
+                    Discount
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {(order.items ?? []).map((item: OrderItem) => {
+                  const itemDiscount =
+                    item.original_price != null &&
+                    item.original_price !== "" &&
+                    Number(item.original_price) > Number(item.price)
+                      ? (Number(item.original_price) - Number(item.price)) * item.quantity
+                      : 0;
+                  const imageUrl = resolveImageUrl(item.product_image);
+                  return (
+                    <tr key={item.id} className="border-b border-border/50">
+                      <td className="py-3 pr-4">
+                        <div className="flex items-center gap-3">
+                          {imageUrl ? (
+                            <img
+                              src={imageUrl}
+                              alt=""
+                              className="size-12 shrink-0 rounded-lg object-cover"
+                            />
+                          ) : (
+                            <div className="flex size-12 shrink-0 items-center justify-center rounded-lg bg-muted">
+                              <Package className="size-5 text-muted-foreground" />
+                            </div>
+                          )}
+                          <div>
+                            <p className="font-medium text-foreground">
+                              <Link
+                                href={`/products/${item.product}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="hover:underline"
+                              >
+                                {item.product_name}
+                              </Link>
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              {[item.product_brand, item.size ? `Size: ${item.size}` : null]
+                                .filter(Boolean)
+                                .join(" · ") || "—"}
+                            </p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="py-3 pr-4 text-muted-foreground">
+                        {item.quantity}
+                      </td>
+                      <td className="py-3 pr-4">
+                        {currencySymbol}{Number(item.price).toLocaleString()}
+                      </td>
+                      <td className="py-3 text-right">
+                        {itemDiscount > 0 ? (
+                          <span className="text-destructive">
+                            -{currencySymbol}{itemDiscount.toLocaleString()}
+                          </span>
+                        ) : (
+                          "—"
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
             </div>
-          </div>
+          </CardContent>
+        </Card>
 
-          {/* Shipping – read or edit mode */}
-          <div className="rounded-xl border border-gray-200 bg-white p-5">
-            <h2 className="mb-4 font-semibold text-gray-900">Shipping &amp; Contact</h2>
+        {/* Right column: Payment + Customer stacked (height drives Product card on desktop) */}
+        <div ref={rightColRef} className="flex flex-col gap-6 lg:col-span-1">
+        {/* Payment */}
+        <Card className="overflow-hidden rounded-xl border bg-card shadow-sm">
+          <CardHeader className="border-b border-border/50 px-4 pb-4 sm:px-6">
+            <CardTitle>Payment</CardTitle>
+            <CardDescription>Final Payment Amount</CardDescription>
+          </CardHeader>
+          <CardContent className="px-4 pt-6 sm:px-6">
+            <dl className="space-y-3 text-sm">
+              <div className="flex justify-between">
+                <dt className="text-muted-foreground">Subtotal</dt>
+                <dd>{currencySymbol}{subtotal.toLocaleString()}</dd>
+              </div>
+              <div className="flex justify-between">
+                <dt className="text-muted-foreground">Discount</dt>
+                <dd className={combinedDiscount ? "text-destructive" : undefined}>
+                  {combinedDiscount ? `-${currencySymbol}${combinedDiscount.toLocaleString()}` : "—"}
+                </dd>
+              </div>
+              <div className="flex justify-between">
+                <dt className="text-muted-foreground">Shipping Cost</dt>
+                <dd>
+                  {shippingCost
+                    ? `${currencySymbol}${shippingCost.toLocaleString()}`
+                    : "—"}
+                </dd>
+              </div>
+              <div className="flex justify-between border-t border-border pt-3 text-base font-semibold">
+                <dt>Total</dt>
+                <dd>{currencySymbol}{totalNum.toLocaleString()}</dd>
+              </div>
+            </dl>
+          </CardContent>
+        </Card>
 
+        {/* Customer */}
+        <Card className="overflow-hidden rounded-xl border bg-card shadow-sm">
+          <CardHeader className="border-b border-border/50 px-4 pb-4 sm:px-6">
+            <CardTitle>Customer</CardTitle>
+            <CardDescription>Information Detail</CardDescription>
+          </CardHeader>
+          <CardContent className="px-4 pt-6 sm:px-6">
             {editing ? (
-              <form onSubmit={handleSave} className="space-y-3">
-                <div className="grid grid-cols-2 gap-3">
+              <form onSubmit={handleSave} className="space-y-4">
+                <div className="grid gap-3 sm:grid-cols-2">
                   <div>
-                    <label className="mb-1 block text-xs font-medium text-gray-500">Name</label>
-                    <input value={form.shipping_name} onChange={(e) => setForm({ ...form, shipping_name: e.target.value })} className="input" />
+                    <label className="mb-1 block text-xs font-medium text-muted-foreground">
+                      Name
+                    </label>
+                    <input
+                      value={form.shipping_name}
+                      onChange={(e) =>
+                        setForm({ ...form, shipping_name: e.target.value })
+                      }
+                      className="input"
+                    />
                   </div>
                   <div>
-                    <label className="mb-1 block text-xs font-medium text-gray-500">Phone</label>
-                    <input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} className="input" />
+                    <label className="mb-1 block text-xs font-medium text-muted-foreground">
+                      Phone
+                    </label>
+                    <input
+                      value={form.phone}
+                      onChange={(e) =>
+                        setForm({ ...form, phone: e.target.value })
+                      }
+                      className="input"
+                    />
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid gap-3 sm:grid-cols-2">
                   <div>
-                    <label className="mb-1 block text-xs font-medium text-gray-500">Email</label>
-                    <input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className="input" />
+                    <label className="mb-1 block text-xs font-medium text-muted-foreground">
+                      Email
+                    </label>
+                    <input
+                      type="email"
+                      value={form.email}
+                      onChange={(e) =>
+                        setForm({ ...form, email: e.target.value })
+                      }
+                      className="input"
+                    />
                   </div>
                   <div>
-                    <label className="mb-1 block text-xs font-medium text-gray-500">District</label>
-                    <input value={form.district} onChange={(e) => setForm({ ...form, district: e.target.value })} className="input" />
+                    <label className="mb-1 block text-xs font-medium text-muted-foreground">
+                      District
+                    </label>
+                    <input
+                      value={form.district}
+                      onChange={(e) =>
+                        setForm({ ...form, district: e.target.value })
+                      }
+                      className="input"
+                    />
                   </div>
                 </div>
                 <div>
-                  <label className="mb-1 block text-xs font-medium text-gray-500">Address</label>
-                  <textarea rows={2} value={form.shipping_address} onChange={(e) => setForm({ ...form, shipping_address: e.target.value })} className="input" />
+                  <label className="mb-1 block text-xs font-medium text-muted-foreground">
+                    Address
+                  </label>
+                  <textarea
+                    rows={2}
+                    value={form.shipping_address}
+                    onChange={(e) =>
+                      setForm({ ...form, shipping_address: e.target.value })
+                    }
+                    className="input"
+                  />
                 </div>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid gap-3 sm:grid-cols-2">
                   <div>
-                    <label className="mb-1 block text-xs font-medium text-gray-500">Delivery Area</label>
-                    <select value={form.delivery_area} onChange={(e) => setForm({ ...form, delivery_area: e.target.value })} className="input">
+                    <label className="mb-1 block text-xs font-medium text-muted-foreground">
+                      Delivery Area
+                    </label>
+                    <select
+                      value={form.delivery_area}
+                      onChange={(e) =>
+                        setForm({ ...form, delivery_area: e.target.value })
+                      }
+                      className="input"
+                    >
                       {DELIVERY_OPTIONS.map((opt) => (
-                        <option key={opt.value} value={opt.value}>{opt.label}</option>
+                        <option key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </option>
                       ))}
                     </select>
                   </div>
                   <div>
-                    <label className="mb-1 block text-xs font-medium text-gray-500">Tracking Number</label>
-                    <input value={form.tracking_number} onChange={(e) => setForm({ ...form, tracking_number: e.target.value })} className="input" />
+                    <label className="mb-1 block text-xs font-medium text-muted-foreground">
+                      Tracking Number
+                    </label>
+                    <input
+                      value={form.tracking_number}
+                      onChange={(e) =>
+                        setForm({
+                          ...form,
+                          tracking_number: e.target.value,
+                        })
+                      }
+                      className="input"
+                    />
                   </div>
                 </div>
                 <div className="flex gap-2 pt-2">
-                  <button type="submit" disabled={saving} className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50">
-                    {saving ? "Saving..." : "Save Changes"}
-                  </button>
-                  <button type="button" onClick={() => setEditing(false)} className="rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                  <Button type="submit" disabled={saving}>
+                    {saving ? "Saving…" : "Save Changes"}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setEditing(false)}
+                  >
                     Cancel
-                  </button>
+                  </Button>
                 </div>
               </form>
             ) : (
-              <dl className="grid grid-cols-2 gap-4 text-sm">
-                <div>
-                  <dt className="text-gray-500">Name</dt>
-                  <dd className="mt-1 font-medium text-gray-900">{order.shipping_name || "—"}</dd>
+              <div className="space-y-6">
+                <div className="flex items-start gap-3">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-muted">
+                    <User className="size-5 text-muted-foreground" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                      General Information
+                    </p>
+                    <p className="font-medium text-foreground">
+                      {order.shipping_name || "—"}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      {order.email || "—"}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      {order.phone || "—"}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <dt className="text-gray-500">Phone</dt>
-                  <dd className="mt-1 font-medium text-gray-900">{order.phone || "—"}</dd>
+                <div className="flex items-start gap-3">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-muted">
+                    <Home className="size-5 text-muted-foreground" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                      Shipping Address
+                    </p>
+                    <p className="text-sm text-foreground">
+                      {order.shipping_address || "—"}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      {order.district && `${order.district}, `}
+                      {order.delivery_area_label}
+                    </p>
+                    {order.phone && (
+                      <p className="text-sm text-muted-foreground">
+                        {order.phone}
+                      </p>
+                    )}
+                  </div>
                 </div>
-                <div>
-                  <dt className="text-gray-500">Email</dt>
-                  <dd className="mt-1 font-medium text-gray-900">{order.email || "—"}</dd>
+                <div className="flex items-start gap-3">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-muted">
+                    <CreditCard className="size-5 text-muted-foreground" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                      Billing Address
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      Same as shipping address
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <dt className="text-gray-500">District</dt>
-                  <dd className="mt-1 font-medium text-gray-900">{order.district || "—"}</dd>
-                </div>
-                <div className="col-span-2">
-                  <dt className="text-gray-500">Address</dt>
-                  <dd className="mt-1 font-medium text-gray-900">{order.shipping_address || "—"}</dd>
-                </div>
-                <div>
-                  <dt className="text-gray-500">Delivery Area</dt>
-                  <dd className="mt-1 font-medium text-gray-900">{order.delivery_area_label}</dd>
-                </div>
-                <div>
-                  <dt className="text-gray-500">Tracking Number</dt>
-                  <dd className="mt-1 font-medium text-gray-900">{order.tracking_number || "—"}</dd>
-                </div>
-              </dl>
+              </div>
             )}
-          </div>
-        </div>
-
-        {/* Sidebar */}
-        <div className="space-y-6">
-          <div className="rounded-xl border border-gray-200 bg-white p-5">
-            <h2 className="mb-4 font-semibold text-gray-900">Summary</h2>
-            <dl className="space-y-3 text-sm">
-              <div className="flex justify-between">
-                <dt className="text-gray-500">Total</dt>
-                <dd className="text-lg font-bold text-gray-900">৳{Number(order.total).toLocaleString()}</dd>
-              </div>
-              <div className="flex justify-between">
-                <dt className="text-gray-500">Created</dt>
-                <dd className="text-gray-700">{new Date(order.created_at).toLocaleString()}</dd>
-              </div>
-              <div className="flex justify-between">
-                <dt className="text-gray-500">Updated</dt>
-                <dd className="text-gray-700">{new Date(order.updated_at).toLocaleString()}</dd>
-              </div>
-            </dl>
-          </div>
-
-          <div className="rounded-xl border border-gray-200 bg-white p-5">
-            <h2 className="mb-4 font-semibold text-gray-900">Status</h2>
-            <div className="space-y-2">
-              {STATUS_OPTIONS.map((opt) => (
-                <button
-                  key={opt.value}
-                  disabled={updating || order.status === opt.value}
-                  onClick={() => updateStatus(opt.value)}
-                  className={`w-full rounded-lg px-4 py-2 text-sm font-medium transition ${
-                    order.status === opt.value
-                      ? "bg-blue-600 text-white"
-                      : "border border-gray-300 text-gray-700 hover:bg-gray-50"
-                  } disabled:opacity-50`}
-                >
-                  {opt.label}
-                </button>
-              ))}
-            </div>
-          </div>
+          </CardContent>
+        </Card>
         </div>
       </div>
+
+      {/* Timeline */}
+      <Card className="overflow-hidden rounded-xl border bg-card shadow-sm">
+        <CardHeader className="border-b border-border/50 px-4 pb-4 sm:px-6">
+          <CardTitle>Timeline</CardTitle>
+          <CardDescription>Track Order Progress</CardDescription>
+        </CardHeader>
+        <CardContent className="px-4 pt-6 sm:px-6">
+          <ul className="space-y-4">
+            {timelineEvents.map((event, i) => {
+              const Icon = event.icon;
+              const titleLabel = event.text.toUpperCase().replace(/\s+/g, " ");
+              return (
+                <li key={i} className="flex flex-col gap-1.5 sm:flex-row sm:items-start sm:gap-3">
+                  <div className="flex min-w-0 flex-1 items-start gap-3">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-muted">
+                      <Icon className="size-5 text-muted-foreground" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                        {titleLabel}
+                      </p>
+                      {event.by && (
+                        <p className="text-sm text-muted-foreground">
+                          {event.text === "Order placed"
+                            ? `by ${event.by}`
+                            : `Confirmed by ${event.by}`}
+                        </p>
+                      )}
+                      <p className="text-sm text-muted-foreground sm:hidden">
+                        {formatOrderDate(event.date)}
+                      </p>
+                    </div>
+                  </div>
+                  <span className="hidden shrink-0 text-sm text-muted-foreground sm:block">
+                    {formatOrderDate(event.date)}
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
+        </CardContent>
+      </Card>
     </div>
   );
 }

@@ -1,5 +1,64 @@
 @import "tailwindcss";
 
+/* ============================================
+   FONT FACES - Futura PT (from gadzillabd-frontend)
+   ============================================ */
+@font-face {
+  font-family: 'Futura PT';
+  src: url('/assets/fonts/futura-pt/FuturaCyrillicLight.ttf') format('truetype');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Futura PT';
+  src: url('/assets/fonts/futura-pt/FuturaCyrillicBook.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Futura PT';
+  src: url('/assets/fonts/futura-pt/FuturaCyrillicMedium.ttf') format('truetype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Futura PT';
+  src: url('/assets/fonts/futura-pt/FuturaCyrillicDemi.ttf') format('truetype');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Futura PT';
+  src: url('/assets/fonts/futura-pt/FuturaCyrillicBold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Futura PT';
+  src: url('/assets/fonts/futura-pt/FuturaCyrillicExtraBold.ttf') format('truetype');
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Futura PT';
+  src: url('/assets/fonts/futura-pt/FuturaCyrillicHeavy.ttf') format('truetype');
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -26,6 +85,10 @@
 }
 
 @theme inline {
+  /* Primary text: Futura PT. Numbers: IBM Plex Mono (use font-mono or .font-numbers) */
+  --font-family-sans: 'Futura PT', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-family-mono: var(--font-ibm-plex-mono), ui-monospace, monospace;
+
   --color-background: hsl(var(--background));
   --color-foreground: hsl(var(--foreground));
   --color-card: hsl(var(--card));
@@ -54,8 +117,15 @@
 }
 
 body {
+  font-family: var(--font-family-sans);
   background: hsl(var(--background));
   color: hsl(var(--foreground));
+}
+
+/* Use .font-mono or .font-numbers for numeric content (prices, counts, IDs) */
+.font-numbers {
+  font-family: var(--font-family-mono);
+  font-variant-numeric: tabular-nums;
 }
 
 /* Only loading spinners stay rounded */

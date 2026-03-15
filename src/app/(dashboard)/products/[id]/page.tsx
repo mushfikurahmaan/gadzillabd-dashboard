@@ -87,7 +87,7 @@ export default function EditProductPage() {
         >
           &larr; Back
         </button>
-        <h1 className="text-2xl font-bold text-gray-900">Edit Product</h1>
+        <h1 className="text-2xl font-semibold text-gray-900">Edit Product</h1>
       </div>
 
       {error && (

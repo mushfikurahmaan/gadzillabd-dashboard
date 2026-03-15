@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import api from "@/lib/api";
+import { useBranding } from "@/context/BrandingContext";
 import type { Product, PaginatedResponse } from "@/types";
 
 const DELIVERY_OPTIONS = [
@@ -22,6 +23,7 @@ interface OrderItemRow {
 
 export default function NewOrderPage() {
   const router = useRouter();
+  const { currencySymbol } = useBranding();
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
@@ -153,7 +155,7 @@ export default function NewOrderPage() {
         >
           &larr; Back
         </button>
-        <h1 className="text-2xl font-bold text-gray-900">New Order</h1>
+        <h1 className="text-2xl font-semibold text-gray-900">New Order</h1>
       </div>
 
       {error && (
@@ -285,7 +287,7 @@ export default function NewOrderPage() {
                         {product.name}
                       </p>
                       <p className="text-xs text-gray-500">
-                        ৳{Number(product.price).toLocaleString()} &middot;
+                        {currencySymbol}{Number(product.price).toLocaleString()} &middot;
                         Stock: {product.stock}
                       </p>
                     </div>
@@ -358,7 +360,7 @@ export default function NewOrderPage() {
                       </div>
                       <div className="w-28">
                         <label className="mb-0.5 block text-xs text-gray-500">
-                          Price (৳)
+                          Price ({currencySymbol})
                         </label>
                         <input
                           type="number"
@@ -373,7 +375,7 @@ export default function NewOrderPage() {
                       </div>
                       <div className="flex items-end">
                         <p className="pb-1 text-sm font-medium text-gray-700">
-                          = ৳
+                          = {currencySymbol}
                           {(
                             Number(item.price || 0) * item.quantity
                           ).toLocaleString()}
@@ -406,7 +408,7 @@ export default function NewOrderPage() {
 
               <div className="flex justify-end border-t border-gray-200 pt-3">
                 <p className="text-lg font-bold text-gray-900">
-                  Total: ৳{total.toLocaleString()}
+                  Total: {currencySymbol}{total.toLocaleString()}
                 </p>
               </div>
             </div>
