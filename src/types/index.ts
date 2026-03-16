@@ -155,6 +155,7 @@ export interface CartItem {
   id: number;
   product: number;
   product_name: string;
+  product_brand?: string;
   quantity: number;
   size: string;
   created_at: string;
@@ -172,6 +173,7 @@ export interface WishlistItem {
   id: number;
   product: number;
   product_name: string;
+  product_brand?: string;
   created_at: string;
 }
 

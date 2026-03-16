@@ -1,8 +1,10 @@
 "use client";
 
-import { Menu, Search } from "lucide-react";
+import Link from "next/link";
+import { Menu, Search, CircleUserRound } from "lucide-react";
 import { useSearchModal } from "@/context/SearchModalContext";
 import { Button } from "@/components/ui/button";
+import NotificationDropdown from "@/components/NotificationDropdown";
 
 interface MobileNavBarProps {
   onMenuClick: () => void;
@@ -16,15 +18,28 @@ export default function MobileNavBar({ onMenuClick }: MobileNavBarProps) {
       <Button variant="ghost" size="icon" aria-label="Open menu" onClick={onMenuClick}>
         <Menu className="size-5" />
       </Button>
-      <Button
-        variant="ghost"
-        size="icon"
-        aria-label="Search"
-        onClick={() => setSearchOpen(true)}
-        className="shrink-0 text-muted-foreground hover:text-foreground"
-      >
-        <Search className="size-5" />
-      </Button>
+      <div className="flex items-center gap-1">
+        <Button
+          variant="ghost"
+          size="icon"
+          aria-label="Search"
+          onClick={() => setSearchOpen(true)}
+          className="shrink-0 text-muted-foreground hover:text-foreground"
+        >
+          <Search className="size-5" />
+        </Button>
+        <NotificationDropdown />
+        <Link href="/account">
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label="Account"
+            className="shrink-0 text-muted-foreground hover:text-foreground"
+          >
+            <CircleUserRound className="size-5" />
+          </Button>
+        </Link>
+      </div>
     </div>
   );
 }

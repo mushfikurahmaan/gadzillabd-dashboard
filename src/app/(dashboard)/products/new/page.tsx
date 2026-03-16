@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, FileText, Check, Plus, X } from "lucide-react";
+import { Undo2, FileText, Check, Plus, X } from "lucide-react";
 import api from "@/lib/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -190,16 +190,18 @@ export default function NewProductPage() {
       {/* Page header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            aria-label="Back to products"
-            onClick={() => router.back()}
-            className="shrink-0"
-          >
-            <ArrowLeft className="size-4" />
-          </Button>
+          <div className="rounded-lg bg-muted/80 px-1 py-1">
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              aria-label="Back to products"
+              onClick={() => router.back()}
+              className="shrink-0"
+            >
+              <Undo2 className="size-4" />
+            </Button>
+          </div>
           <h1 className="text-2xl font-semibold text-foreground tracking-tight">
             Add New Product
           </h1>

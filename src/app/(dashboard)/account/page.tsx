@@ -13,7 +13,23 @@ function logoUrl(url: string | null): string | null {
   return base ? `${base.replace(/\/$/, "")}${url.startsWith("/") ? "" : "/"}${url}` : url;
 }
 
-export default function SettingsPage() {
+const NOTIFICATION_PREFS_KEY = "gadzillabd_notification_prefs";
+
+type NotificationPrefs = {
+  orders: boolean;
+  carts: boolean;
+  wishlist: boolean;
+  contacts: boolean;
+};
+
+const defaultPrefs: NotificationPrefs = {
+  orders: true,
+  carts: true,
+  wishlist: true,
+  contacts: true,
+};
+
+export default function AccountPage() {
   const { branding, isLoading, refetch } = useBranding();
   const [adminName, setAdminName] = useState(defaultBranding.admin_name);
   const [adminSubtitle, setAdminSubtitle] = useState(defaultBranding.admin_subtitle);
@@ -23,6 +39,7 @@ export default function SettingsPage() {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [notificationPrefs, setNotificationPrefs] = useState<NotificationPrefs>(defaultPrefs);
 
   useEffect(() => {
     if (branding) {
@@ -31,6 +48,28 @@ export default function SettingsPage() {
       setCurrencySymbol(branding.currency_symbol ?? defaultBranding.currency_symbol);
     }
   }, [branding]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      const raw = window.localStorage.getItem(NOTIFICATION_PREFS_KEY);
+      if (!raw) return;
+      const parsed = JSON.parse(raw) as Partial<NotificationPrefs>;
+      setNotificationPrefs({ ...defaultPrefs, ...parsed });
+    } catch {
+      // ignore and keep defaults
+    }
+  }, []);
+
+  function updateNotificationPref(key: keyof NotificationPrefs, value: boolean) {
+    setNotificationPrefs((prev) => {
+      const next = { ...prev, [key]: value };
+      if (typeof window !== "undefined") {
+        window.localStorage.setItem(NOTIFICATION_PREFS_KEY, JSON.stringify(next));
+      }
+      return next;
+    });
+  }
 
   const currentLogoUrl = logoUrl(branding?.logo_url ?? null);
   const previewUrl = logoFile ? URL.createObjectURL(logoFile) : currentLogoUrl;
@@ -43,7 +82,10 @@ export default function SettingsPage() {
       const formData = new FormData();
       formData.append("admin_name", adminName || defaultBranding.admin_name);
       formData.append("admin_subtitle", adminSubtitle || defaultBranding.admin_subtitle);
-      formData.append("currency_symbol", (currencySymbol || defaultBranding.currency_symbol).trim().slice(0, 10));
+      formData.append(
+        "currency_symbol",
+        (currencySymbol || defaultBranding.currency_symbol).trim().slice(0, 10)
+      );
       if (logoFile) formData.append("logo", logoFile);
       if (clearLogo) formData.append("clear_logo", "true");
 
@@ -70,19 +112,12 @@ export default function SettingsPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-semibold text-foreground">Branding</h1>
+      <h1 className="text-2xl font-semibold text-foreground">Account</h1>
       <p className="text-muted-foreground">
-        Set your dashboard logo, admin name, and subtitle. These appear in the sidebar header.
+        Manage your account branding and notification preferences for the admin dashboard.
       </p>
 
       <form onSubmit={handleSubmit} className="max-w-xl space-y-6">
-        <div>
-          <h2 className="text-lg font-semibold text-foreground">Sidebar branding</h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Logo is shown rounded in the sidebar and mobile header.
-          </p>
-        </div>
-
         {/* Logo */}
         <div className="space-y-2">
           <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
@@ -91,11 +126,7 @@ export default function SettingsPage() {
           <div className="flex flex-wrap items-center gap-4">
             {previewUrl && !clearLogo ? (
               <div className="relative size-20 overflow-hidden rounded-full border border-border bg-muted">
-                <img
-                  src={previewUrl}
-                  alt="Logo preview"
-                  className="size-full object-cover"
-                />
+                <img src={previewUrl} alt="Logo preview" className="size-full object-cover" />
               </div>
             ) : (
               <div className="flex size-20 items-center justify-center rounded-full border border-dashed border-border bg-muted text-muted-foreground">
@@ -145,7 +176,10 @@ export default function SettingsPage() {
         </div>
 
         <div className="flex flex-col gap-2">
-          <label htmlFor="admin_subtitle" className="text-sm font-medium leading-normal text-foreground">
+          <label
+            htmlFor="admin_subtitle"
+            className="text-sm font-medium leading-normal text-foreground"
+          >
             Admin subtitle
           </label>
           <Input
@@ -158,7 +192,10 @@ export default function SettingsPage() {
         </div>
 
         <div className="flex flex-col gap-2">
-          <label htmlFor="currency_symbol" className="text-sm font-medium leading-normal text-foreground">
+          <label
+            htmlFor="currency_symbol"
+            className="text-sm font-medium leading-normal text-foreground"
+          >
             Currency symbol
           </label>
           <Input
@@ -185,9 +222,51 @@ export default function SettingsPage() {
         )}
 
         <Button type="submit" disabled={saving}>
-          {saving ? "Saving…" : "Save branding"}
+          {saving ? "Saving…" : "Save account settings"}
         </Button>
       </form>
+
+      <div className="max-w-xl space-y-4 border-t border-border pt-6">
+        <h2 className="text-lg font-semibold text-foreground">Notification preferences</h2>
+        <p className="text-sm text-muted-foreground">
+          Choose which events should generate notifications in the top bar.
+        </p>
+        <div className="space-y-3">
+          <label className="flex items-center justify-between gap-4 text-sm">
+            <span className="text-foreground">Orders</span>
+            <input
+              type="checkbox"
+              checked={notificationPrefs.orders}
+              onChange={(e) => updateNotificationPref("orders", e.target.checked)}
+            />
+          </label>
+          <label className="flex items-center justify-between gap-4 text-sm">
+            <span className="text-foreground">Cart items</span>
+            <input
+              type="checkbox"
+              checked={notificationPrefs.carts}
+              onChange={(e) => updateNotificationPref("carts", e.target.checked)}
+            />
+          </label>
+          <label className="flex items-center justify-between gap-4 text-sm">
+            <span className="text-foreground">Wishlist items</span>
+            <input
+              type="checkbox"
+              checked={notificationPrefs.wishlist}
+              onChange={(e) => updateNotificationPref("wishlist", e.target.checked)}
+            />
+          </label>
+          <label className="flex items-center justify-between gap-4 text-sm">
+            <span className="text-foreground">Contact form submissions</span>
+            <input
+              type="checkbox"
+              checked={notificationPrefs.contacts}
+              onChange={(e) => updateNotificationPref("contacts", e.target.checked)}
+            />
+          </label>
+        </div>
+      </div>
     </div>
   );
 }
+

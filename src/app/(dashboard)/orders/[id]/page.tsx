@@ -209,15 +209,18 @@ export default function OrderDetailPage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-3">
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => router.back()}
-              aria-label="Go back"
-              className="size-10 shrink-0 cursor-pointer rounded-xl border-border bg-white shadow-sm hover:bg-muted/50 hover:border-border"
-            >
-              <Undo2 className="size-5 text-foreground" />
-            </Button>
+            <div className="rounded-lg bg-muted/80 px-1 py-1">
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                onClick={() => router.back()}
+                aria-label="Go back"
+                className="shrink-0"
+              >
+                <Undo2 className="size-4" />
+              </Button>
+            </div>
             <h1 className="text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
               #S-{order.order_number}
             </h1>

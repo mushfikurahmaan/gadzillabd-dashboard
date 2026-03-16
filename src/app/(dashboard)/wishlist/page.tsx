@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import Link from "next/link";
+import { useEffect, useMemo, useState } from "react";
 import api from "@/lib/api";
 import type { WishlistItem, PaginatedResponse } from "@/types";
 
@@ -26,6 +27,34 @@ export default function WishlistPage() {
       .finally(() => setLoading(false));
   }, [page]);
 
+  const groupedItems = useMemo(() => {
+    const map = new Map<
+      number,
+      {
+        product: number;
+        product_name: string;
+        product_brand?: string;
+        count: number;
+      }
+    >();
+
+    for (const item of items) {
+      const existing = map.get(item.product);
+      if (existing) {
+        existing.count += 1;
+      } else {
+        map.set(item.product, {
+          product: item.product,
+          product_name: item.product_name,
+          product_brand: item.product_brand,
+          count: 1,
+        });
+      }
+    }
+
+    return Array.from(map.values());
+  }, [items]);
+
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-semibold text-gray-900">Wishlist ({count})</h1>
@@ -34,7 +63,7 @@ export default function WishlistPage() {
         <div className="flex h-64 items-center justify-center">
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-600 border-t-transparent" />
         </div>
-      ) : items.length === 0 ? (
+      ) : groupedItems.length === 0 ? (
         <div className="rounded-xl border border-gray-200 bg-white py-12 text-center text-sm text-gray-500">
           No wishlist items found
         </div>
@@ -47,19 +76,30 @@ export default function WishlistPage() {
                   <th className="px-4 py-3 text-xs font-semibold tracking-wide text-gray-500 uppercase">
                     Product
                   </th>
+                  <th className="px-4 py-3 text-xs font-semibold tracking-wide text-gray-500 uppercase">
+                    Brand
+                  </th>
                   <th className="px-4 py-3 text-right text-xs font-semibold tracking-wide text-gray-500 uppercase">
-                    Added
+                    Qty
                   </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
-                {items.map((item) => (
-                  <tr key={item.id} className="hover:bg-gray-50">
-                    <td className="px-4 py-3 font-medium text-gray-900">
-                      {item.product_name}
+                {groupedItems.map((item) => (
+                  <tr key={item.product} className="hover:bg-gray-50">
+                    <td className="px-4 py-3 font-medium text-gray-900 whitespace-nowrap">
+                      <Link
+                        href={`/products/${item.product}`}
+                        className="text-blue-600 hover:underline"
+                      >
+                        {item.product_name}
+                      </Link>
                     </td>
-                    <td className="px-4 py-3 text-right text-gray-500">
-                      {new Date(item.created_at).toLocaleDateString()}
+                    <td className="px-4 py-3 text-gray-600 whitespace-nowrap">
+                      {item.product_brand || "—"}
+                    </td>
+                    <td className="px-4 py-3 text-right text-gray-500 whitespace-nowrap">
+                      {item.count}
                     </td>
                   </tr>
                 ))}

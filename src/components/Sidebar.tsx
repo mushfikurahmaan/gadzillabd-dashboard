@@ -18,8 +18,7 @@ import {
   Search,
   LogOut,
   ExternalLink,
-  KeyRound,
-  Palette,
+  CircleUserRound,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -60,7 +59,7 @@ const MAIN_NAV = [
   { href: "/", label: "Home", icon: Birdhouse, countKey: null as keyof NavCounts | null },
   { href: "/orders", label: "Orders", icon: Package, countKey: "orders" as keyof NavCounts | null },
   { href: "/products", label: "Products", icon: Box, countKey: "products" as keyof NavCounts | null },
-  { href: "/notifications", label: "Notifications", icon: Bell, countKey: "notifications" as keyof NavCounts | null },
+  { href: "/cta", label: "CTA", icon: Bell, countKey: "notifications" as keyof NavCounts | null },
   { href: "/carts", label: "Carts", icon: ShoppingCart, countKey: "carts" as keyof NavCounts | null },
   { href: "/wishlist", label: "Wishlist", icon: Heart, countKey: "wishlist" as keyof NavCounts | null },
 ];
@@ -350,9 +349,13 @@ function SidebarContent({
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" className="w-56" side="top">
             <DropdownMenuItem asChild>
-              <Link href="/settings" className="flex cursor-pointer items-center gap-2" onClick={handleLinkClick}>
-                <Palette className="size-4" />
-                Branding
+              <Link
+                href="/account"
+                className="hidden cursor-pointer items-center gap-2 md:flex"
+                onClick={handleLinkClick}
+              >
+                <CircleUserRound className="size-4" />
+                Account
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
