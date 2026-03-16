@@ -1,10 +1,19 @@
-"use client";
+ "use client";
 
 import { useRouter } from "next/navigation";
 import { useCallback, useRef, useState } from "react";
 import { useNotifications } from "@/context/NotificationContext";
 import { getNotificationLink } from "@/lib/notifications";
 import { Button } from "@/components/ui/button";
+
+function formatDateTime(value: string): string {
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return value;
+  const pad = (n: number) => n.toString().padStart(2, "0");
+  const datePart = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  const timePart = `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+  return `${datePart}, ${timePart}`;
+}
 
 export default function NotificationsFeedPage() {
   const {
@@ -131,7 +140,7 @@ export default function NotificationsFeedPage() {
                   )}
                 </div>
                 <div className="shrink-0 text-xs text-muted-foreground">
-                  {new Date(notification.createdAt).toLocaleString()}
+                  {formatDateTime(notification.createdAt)}
                 </div>
               </button>
             ))}

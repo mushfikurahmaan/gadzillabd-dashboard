@@ -14,6 +14,13 @@ const STATUS_OPTIONS = [
 
 type OrderStatus = (typeof STATUS_OPTIONS)[number]["value"];
 
+function formatDate(value: string): string {
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return value;
+  const pad = (n: number) => n.toString().padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
+
 export default function OrdersPage() {
   const { currencySymbol } = useBranding();
   const [orders, setOrders] = useState<Order[]>([]);
@@ -192,7 +199,7 @@ export default function OrdersPage() {
                     </td>
                     <td className="px-4 py-3 text-gray-500 whitespace-nowrap">{order.delivery_area_label}</td>
                     <td className="px-4 py-3 text-gray-500 whitespace-nowrap">
-                      {new Date(order.created_at).toLocaleDateString()}
+                      {formatDate(order.created_at)}
                     </td>
                   </tr>
                 ))}

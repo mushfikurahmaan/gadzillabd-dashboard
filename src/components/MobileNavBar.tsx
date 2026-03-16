@@ -14,7 +14,7 @@ export default function MobileNavBar({ onMenuClick }: MobileNavBarProps) {
   const { setOpen: setSearchOpen } = useSearchModal();
 
   return (
-    <div className="flex h-14 items-center justify-between border-b border-border bg-background px-4 md:hidden">
+    <div className="sticky top-0 z-40 flex h-14 items-center justify-between border-b border-border bg-background px-4 md:hidden">
       <Button
         variant="ghost"
         size="icon"

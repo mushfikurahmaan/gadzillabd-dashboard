@@ -1,8 +1,17 @@
-"use client";
+ "use client";
 
 import { useEffect, useState } from "react";
 import api from "@/lib/api";
 import type { ContactSubmission, PaginatedResponse } from "@/types";
+
+function formatDateTime(value: string): string {
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return value;
+  const pad = (n: number) => n.toString().padStart(2, "0");
+  const datePart = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  const timePart = `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+  return `${datePart}, ${timePart}`;
+}
 
 export default function ContactsPage() {
   const [contacts, setContacts] = useState<ContactSubmission[]>([]);
@@ -64,7 +73,7 @@ export default function ContactsPage() {
                       {contact.email && ` · ${contact.email}`}
                     </p>
                     <p className="mt-1 text-xs text-gray-400">
-                      {new Date(contact.created_at).toLocaleString()}
+                      {formatDateTime(contact.created_at)}
                     </p>
                   </div>
                   <div className="flex gap-2">

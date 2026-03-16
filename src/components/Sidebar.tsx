@@ -359,16 +359,6 @@ function SidebarContent({
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" className="w-56" side="top">
             <DropdownMenuItem asChild>
-              <Link
-                href="/account"
-                className="hidden cursor-pointer items-center gap-2 md:flex"
-                onClick={handleLinkClick}
-              >
-                <CircleUserRound className="size-4" />
-                Account
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild>
               <a href="/" className="flex cursor-pointer items-center gap-2">
                 <ExternalLink className="size-4" />
                 View site

@@ -183,3 +183,20 @@ export interface PaginatedResponse<T> {
   previous: string | null;
   results: T[];
 }
+
+export interface ActivityActor {
+  id: number;
+  username: string;
+  email: string;
+}
+
+export interface ActivityLog {
+  id: number;
+  created_at: string;
+  actor: ActivityActor | null;
+  action: "create" | "update" | "delete" | "custom";
+  entity_type: string;
+  entity_id: string;
+  summary: string;
+  metadata: Record<string, unknown>;
+}

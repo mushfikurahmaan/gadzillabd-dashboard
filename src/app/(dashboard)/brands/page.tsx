@@ -1,4 +1,4 @@
-"use client";
+ "use client";
 
 import { useEffect, useState, type FormEvent } from "react";
 import api from "@/lib/api";
@@ -10,6 +10,13 @@ type BrandForm = {
 };
 
 const emptyForm: BrandForm = { name: "", slug: "", redirect_url: "", brand_type: "gadgets", order: "0", is_active: true };
+
+function formatDate(value: string): string {
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return value;
+  const pad = (n: number) => n.toString().padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
 
 export default function BrandsPage() {
   const [brands, setBrands] = useState<Brand[]>([]);
@@ -156,7 +163,9 @@ export default function BrandsPage() {
                     {brand.is_active ? "Active" : "Inactive"}
                   </span>
                 </td>
-                <td className="px-4 py-3 text-gray-500">{new Date(brand.created_at).toLocaleDateString()}</td>
+                <td className="px-4 py-3 text-gray-500">
+                  {formatDate(brand.created_at)}
+                </td>
                 <td className="px-4 py-3">
                   <div className="flex gap-2">
                     <button onClick={() => openEdit(brand)} className="text-sm text-blue-600 hover:underline">Edit</button>

@@ -1,4 +1,4 @@
-"use client";
+ "use client";
 
 import { useEffect, useState, type FormEvent } from "react";
 import api from "@/lib/api";
@@ -25,6 +25,14 @@ const emptyForm: CtaForm = {
   end_date: "",
   order: "0",
 };
+
+function formatDate(value: string | null): string {
+  if (!value) return "";
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return value;
+  const pad = (n: number) => n.toString().padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
 
 export default function CtaPage() {
   const [ctas, setCtas] = useState<Notification[]>([]);
@@ -296,10 +304,8 @@ export default function CtaPage() {
                 </td>
                 <td className="px-4 py-3 text-xs text-gray-500">
                   {n.start_date
-                    ? `${new Date(n.start_date).toLocaleDateString()} - ${
-                        n.end_date
-                          ? new Date(n.end_date).toLocaleDateString()
-                          : "∞"
+                    ? `${formatDate(n.start_date)} - ${
+                        n.end_date ? formatDate(n.end_date) : "∞"
                       }`
                     : "Always"}
                 </td>
