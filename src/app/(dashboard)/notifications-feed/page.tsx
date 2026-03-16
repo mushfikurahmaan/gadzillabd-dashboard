@@ -21,7 +21,7 @@ export default function NotificationsFeedPage() {
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [showActions, setShowActions] = useState(false);
-  const longPressTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const longPressTimerRef = useRef<number | null>(null);
   const longPressTriggeredRef = useRef(false);
 
   const handleItemClick = (id: string) => {
@@ -45,7 +45,7 @@ export default function NotificationsFeedPage() {
       longPressTriggeredRef.current = true;
       setSelectedId(id);
       setShowActions(true);
-    }, 1000);
+    }, 500);
   }, []);
 
   const cancelLongPress = useCallback(() => {
@@ -77,7 +77,7 @@ export default function NotificationsFeedPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold text-foreground">
+        <h1 className="text-2xl font-medium text-foreground">
           Notifications {notifications.length > 0 ? `(${notifications.length})` : ""}
         </h1>
         <Button

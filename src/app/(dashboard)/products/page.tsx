@@ -98,7 +98,7 @@ export default function ProductsPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-4 flex-wrap">
-        <h1 className="text-2xl font-semibold text-gray-900">
+        <h1 className="text-2xl font-medium text-gray-900">
           Products ({count})
         </h1>
         <div className="flex items-center gap-2">
@@ -139,12 +139,12 @@ export default function ProductsPage() {
                       aria-label="Select all products on this page"
                     />
                   </th>
-                  <th className="px-4 py-3 text-xs font-semibold tracking-wide text-gray-500 uppercase">Product</th>
-                  <th className="px-4 py-3 text-xs font-semibold tracking-wide text-gray-500 uppercase">Brand</th>
-                  <th className="px-4 py-3 text-xs font-semibold tracking-wide text-gray-500 uppercase">Category</th>
-                  <th className="px-4 py-3 text-xs font-semibold tracking-wide text-gray-500 uppercase">Price</th>
-                  <th className="px-4 py-3 text-xs font-semibold tracking-wide text-gray-500 uppercase">Stock</th>
-                  <th className="px-4 py-3 text-xs font-semibold tracking-wide text-gray-500 uppercase">Status</th>
+                  <th className="px-4 py-3 text-xs font-semibold tracking-wide text-gray-500 uppercase whitespace-nowrap">Product</th>
+                  <th className="px-4 py-3 text-xs font-semibold tracking-wide text-gray-500 uppercase whitespace-nowrap">Brand</th>
+                  <th className="px-4 py-3 text-xs font-semibold tracking-wide text-gray-500 uppercase whitespace-nowrap">Category</th>
+                  <th className="px-4 py-3 text-xs font-semibold tracking-wide text-gray-500 uppercase whitespace-nowrap">Price</th>
+                  <th className="px-4 py-3 text-xs font-semibold tracking-wide text-gray-500 uppercase whitespace-nowrap">Stock</th>
+                  <th className="px-4 py-3 text-xs font-semibold tracking-wide text-gray-500 uppercase whitespace-nowrap">Status</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
@@ -160,7 +160,7 @@ export default function ProductsPage() {
                         aria-label={`Select ${product.name}`}
                       />
                     </td>
-                    <td className="px-4 py-3">
+                    <td className="px-4 py-3 whitespace-nowrap">
                       <Link
                         href={`/products/${product.id}`}
                         className="flex items-center gap-3"
@@ -169,18 +169,20 @@ export default function ProductsPage() {
                           <img
                             src={product.image_url}
                             alt={product.name}
-                            className="h-10 w-10 rounded-lg object-cover"
+                            className="h-10 w-10 rounded-lg object-cover flex-shrink-0"
                           />
                         )}
-                        <span className="font-medium text-blue-600 hover:underline">
+                        <span className="font-medium text-blue-600 hover:underline truncate max-w-xs">
                           {product.name}
                         </span>
                       </Link>
                     </td>
-                    <td className="px-4 py-3 text-gray-700">{product.brand}</td>
-                    <td className="px-4 py-3 text-gray-500">{product.category_name}</td>
-                    <td className="px-4 py-3 text-gray-700">{currencySymbol}{Number(product.price).toLocaleString()}</td>
-                    <td className="px-4 py-3">
+                    <td className="px-4 py-3 text-gray-700 whitespace-nowrap">{product.brand}</td>
+                    <td className="px-4 py-3 text-gray-500 whitespace-nowrap">{product.category_name}</td>
+                    <td className="px-4 py-3 text-gray-700 whitespace-nowrap">
+                      {currencySymbol}{Number(product.price).toLocaleString()}
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap">
                       <div className="flex items-center gap-1">
                         <input
                           type="number"
@@ -206,7 +208,7 @@ export default function ProductsPage() {
                         )}
                       </div>
                     </td>
-                    <td className="px-4 py-3">
+                    <td className="px-4 py-3 whitespace-nowrap">
                       <select
                         value={product.is_active ? "active" : "inactive"}
                         onChange={(e) => handleStatusChange(product, e.target.value === "active")}

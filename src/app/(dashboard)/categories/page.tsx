@@ -150,18 +150,18 @@ export default function CategoriesPage() {
 
   return (
     <div className="space-y-8">
-      <h1 className="text-2xl font-semibold text-gray-900">Categories</h1>
+      <h1 className="text-2xl font-medium text-gray-900">Categories</h1>
 
       {/* ── Navbar Categories ── */}
       <section>
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-gray-900">Navbar Categories ({navCategories.length})</h2>
-          <button onClick={openNavNew} className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700">Add Category</button>
+          <h2 className="text-lg font-medium text-gray-900">Navbar Categories ({navCategories.length})</h2>
+          <button onClick={openNavNew} className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">Add Category</button>
         </div>
 
         {navEditing !== null && (
           <form onSubmit={saveNav} className="mb-4 space-y-3 rounded-xl border border-blue-200 bg-blue-50 p-4">
-            <p className="text-sm font-semibold text-blue-800">{navEditing === "new" ? "New Navbar Category" : "Edit Navbar Category"}</p>
+            <p className="text-sm font-medium text-blue-800">{navEditing === "new" ? "New Navbar Category" : "Edit Navbar Category"}</p>
             <div className="grid grid-cols-2 gap-3">
               <input required placeholder="Name" value={navForm.name} onChange={(e) => setNavForm({ ...navForm, name: e.target.value })} className="input" />
               <input required placeholder="Slug" value={navForm.slug} onChange={(e) => setNavForm({ ...navForm, slug: e.target.value })} className="input" />
@@ -219,7 +219,7 @@ export default function CategoriesPage() {
       {/* ── Subcategories ── */}
       <section>
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-gray-900">Subcategories ({categories.length})</h2>
+          <h2 className="text-lg font-medium text-gray-900">Subcategories ({categories.length})</h2>
           <button onClick={openSubNew} className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700">Add Subcategory</button>
         </div>
 

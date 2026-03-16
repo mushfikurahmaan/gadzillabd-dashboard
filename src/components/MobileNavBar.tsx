@@ -15,10 +15,16 @@ export default function MobileNavBar({ onMenuClick }: MobileNavBarProps) {
 
   return (
     <div className="flex h-14 items-center justify-between border-b border-border bg-background px-4 md:hidden">
-      <Button variant="ghost" size="icon" aria-label="Open menu" onClick={onMenuClick}>
+      <Button
+        variant="ghost"
+        size="icon"
+        aria-label="Open menu"
+        onClick={onMenuClick}
+        className="-ml-2 px-0"
+      >
         <Menu className="size-5" />
       </Button>
-      <div className="flex items-center gap-1">
+      <div className="flex items-center gap-1 -mr-2">
         <Button
           variant="ghost"
           size="icon"

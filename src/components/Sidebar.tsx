@@ -298,6 +298,11 @@ function SidebarContent({
             {!collapsed && (
               <>
                 <span className="flex-1 truncate text-left">More</span>
+                {counts != null && counts.contacts > 0 && (
+                  <span className="relative mr-1 inline-flex h-2 w-2 shrink-0 rounded-full bg-red-500">
+                    <span className="absolute inset-0 animate-ping rounded-full bg-red-400/80" />
+                  </span>
+                )}
                 <ChevronRight
                   className={cn("size-4 shrink-0 transition-transform", celeryOpen && "rotate-90")}
                 />
@@ -310,9 +315,14 @@ function SidebarContent({
                 <Link
                   href="/contacts"
                   onClick={handleLinkClick}
-                  className="block rounded-md px-2 py-2 text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                  className="flex items-center justify-between rounded-md px-2 py-2 text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground"
                 >
-                  Contacts
+                  <span>Contacts</span>
+                  {counts != null && counts.contacts > 0 && (
+                    <Badge className="h-5 min-w-5 rounded-full border-0 bg-red-50 px-1.5 text-xs font-medium text-red-700">
+                      {formatCount(counts.contacts)}
+                    </Badge>
+                  )}
                 </Link>
               </div>
             )}

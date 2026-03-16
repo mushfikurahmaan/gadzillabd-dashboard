@@ -145,8 +145,20 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     refresh();
-    const interval = window.setInterval(refresh, 60000);
-    return () => window.clearInterval(interval);
+    const interval = window.setInterval(refresh, 10000);
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        refresh();
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      window.clearInterval(interval);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
   }, [refresh]);
 
   const markAllAsRead = useCallback(() => {

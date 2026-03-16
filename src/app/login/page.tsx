@@ -11,6 +11,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -27,23 +28,36 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50">
-      <div className="w-full max-w-sm rounded-xl bg-white p-8 shadow-lg">
-        <h1 className="mb-6 text-center text-2xl font-bold text-gray-900">
-          Gadzilla Dashboard
-        </h1>
-        <form onSubmit={handleSubmit} className="space-y-4">
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 via-white to-slate-100 px-4">
+      <div className="w-full max-w-md rounded-none bg-white/80 p-8 shadow-xl shadow-slate-200 ring-1 ring-slate-100 backdrop-blur">
+        <div className="mb-8 space-y-2">
+          <p className="text-sm font-normal uppercase tracking-[0.25em] text-slate-500">
+            Gadzilla Dashboard
+          </p>
+          <h1 className="text-3xl font-semibold tracking-tight text-slate-900">
+            Login
+          </h1>
+          <p className="text-sm text-slate-500">
+            Hi, welcome back{" "}
+            <span role="img" aria-label="waving hand">
+              👋
+            </span>
+          </p>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-6">
           {error && (
-            <div className="rounded-md bg-red-50 p-3 text-sm text-red-600">
+            <div className="rounded-lg border border-red-100 bg-red-50/80 px-3 py-2 text-sm text-red-700">
               {error}
             </div>
           )}
-          <div>
+
+          <div className="space-y-1.5">
             <label
               htmlFor="username"
-              className="mb-1 block text-sm font-medium text-gray-700"
+              className="block text-sm font-medium text-slate-700"
             >
-              Username
+              Email
             </label>
             <input
               id="username"
@@ -51,14 +65,15 @@ export default function LoginPage() {
               required
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-              placeholder="admin"
+              className="w-full rounded-xl border border-slate-200 bg-slate-50/60 px-3 py-2.5 text-sm text-slate-900 placeholder-slate-400 shadow-sm transition focus:border-indigo-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-100"
+              placeholder="e.g. johndoe@email.com"
             />
           </div>
-          <div>
+
+          <div className="space-y-1.5">
             <label
               htmlFor="password"
-              className="mb-1 block text-sm font-medium text-gray-700"
+              className="block text-sm font-medium text-slate-700"
             >
               Password
             </label>
@@ -68,15 +83,29 @@ export default function LoginPage() {
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              className="w-full rounded-xl border border-slate-200 bg-slate-50/60 px-3 py-2.5 text-sm text-slate-900 placeholder-slate-400 shadow-sm transition focus:border-indigo-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-100"
+              placeholder="Enter your password"
             />
           </div>
+
+          <div className="flex items-center justify-between text-sm">
+            <label className="inline-flex items-center gap-2 text-slate-600">
+              <input
+                type="checkbox"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+                className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+              />
+              <span>Remember me</span>
+            </label>
+          </div>
+
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded-lg bg-blue-600 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:opacity-50"
+            className="mt-2 w-full rounded-xl bg-indigo-600 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {loading ? "Signing in..." : "Sign In"}
+            {loading ? "Signing in..." : "Login"}
           </button>
         </form>
       </div>

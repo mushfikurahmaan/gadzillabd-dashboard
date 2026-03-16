@@ -96,7 +96,7 @@ export default function BrandsPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold text-gray-900">Brands ({brands.length})</h1>
+        <h1 className="text-2xl font-medium text-gray-900">Brands ({brands.length})</h1>
         <button onClick={openNew} className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700">Add Brand</button>
       </div>
 

@@ -98,7 +98,7 @@ export default function OrdersPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-4 flex-wrap">
-        <h1 className="text-2xl font-semibold text-gray-900">
+        <h1 className="text-2xl font-medium text-gray-900">
           Orders ({count})
         </h1>
         <div className="flex items-center gap-2">
@@ -139,13 +139,13 @@ export default function OrdersPage() {
                       aria-label="Select all orders on this page"
                     />
                   </th>
-                  <th className="px-4 py-3 text-xs font-semibold tracking-wide text-gray-500 uppercase">Order #</th>
-                  <th className="px-4 py-3 text-xs font-semibold tracking-wide text-gray-500 uppercase">Customer</th>
-                  <th className="px-4 py-3 text-xs font-semibold tracking-wide text-gray-500 uppercase">Phone</th>
-                  <th className="px-4 py-3 text-xs font-semibold tracking-wide text-gray-500 uppercase">Status</th>
-                  <th className="px-4 py-3 text-xs font-semibold tracking-wide text-gray-500 uppercase">Total</th>
-                  <th className="px-4 py-3 text-xs font-semibold tracking-wide text-gray-500 uppercase">Delivery</th>
-                  <th className="px-4 py-3 text-xs font-semibold tracking-wide text-gray-500 uppercase">Date</th>
+                  <th className="px-4 py-3 text-xs font-semibold tracking-wide text-gray-500 uppercase whitespace-nowrap">Order #</th>
+                  <th className="px-4 py-3 text-xs font-semibold tracking-wide text-gray-500 uppercase whitespace-nowrap">Customer</th>
+                  <th className="px-4 py-3 text-xs font-semibold tracking-wide text-gray-500 uppercase whitespace-nowrap">Phone</th>
+                  <th className="px-4 py-3 text-xs font-semibold tracking-wide text-gray-500 uppercase whitespace-nowrap">Status</th>
+                  <th className="px-4 py-3 text-xs font-semibold tracking-wide text-gray-500 uppercase whitespace-nowrap">Total</th>
+                  <th className="px-4 py-3 text-xs font-semibold tracking-wide text-gray-500 uppercase whitespace-nowrap">Delivery</th>
+                  <th className="px-4 py-3 text-xs font-semibold tracking-wide text-gray-500 uppercase whitespace-nowrap">Date</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
@@ -160,17 +160,17 @@ export default function OrdersPage() {
                         aria-label={`Select order ${order.order_number}`}
                       />
                     </td>
-                    <td className="px-4 py-3">
+                    <td className="px-4 py-3 whitespace-nowrap">
                       <Link
                         href={`/orders/${order.id}`}
-                        className="font-medium text-blue-600 hover:underline"
+                        className="font-medium text-blue-600 hover:underline whitespace-nowrap"
                       >
                         {order.order_number}
                       </Link>
                     </td>
-                    <td className="px-4 py-3 text-gray-700">{order.shipping_name || "—"}</td>
-                    <td className="px-4 py-3 text-gray-700">{order.phone || "—"}</td>
-                    <td className="px-4 py-3">
+                    <td className="px-4 py-3 text-gray-700 whitespace-nowrap">{order.shipping_name || "—"}</td>
+                    <td className="px-4 py-3 text-gray-700 whitespace-nowrap">{order.phone || "—"}</td>
+                    <td className="px-4 py-3 whitespace-nowrap">
                       <select
                         value={order.status}
                         onChange={(e) => handleStatusChange(order.id, e.target.value as OrderStatus)}
@@ -187,9 +187,11 @@ export default function OrdersPage() {
                         <span className="ml-1.5 inline-block h-3 w-3 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
                       )}
                     </td>
-                    <td className="px-4 py-3 text-gray-700">{currencySymbol}{Number(order.total).toLocaleString()}</td>
-                    <td className="px-4 py-3 text-gray-500">{order.delivery_area_label}</td>
-                    <td className="px-4 py-3 text-gray-500">
+                    <td className="px-4 py-3 text-gray-700 whitespace-nowrap">
+                      {currencySymbol}{Number(order.total).toLocaleString()}
+                    </td>
+                    <td className="px-4 py-3 text-gray-500 whitespace-nowrap">{order.delivery_area_label}</td>
+                    <td className="px-4 py-3 text-gray-500 whitespace-nowrap">
                       {new Date(order.created_at).toLocaleDateString()}
                     </td>
                   </tr>

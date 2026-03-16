@@ -112,7 +112,7 @@ export default function AccountPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-semibold text-foreground">Account</h1>
+      <h1 className="text-2xl font-medium text-foreground">Account</h1>
       <p className="text-muted-foreground">
         Manage your account branding and notification preferences for the admin dashboard.
       </p>
@@ -227,7 +227,7 @@ export default function AccountPage() {
       </form>
 
       <div className="max-w-xl space-y-4 border-t border-border pt-6">
-        <h2 className="text-lg font-semibold text-foreground">Notification preferences</h2>
+        <h2 className="text-lg font-medium text-foreground">Notification preferences</h2>
         <p className="text-sm text-muted-foreground">
           Choose which events should generate notifications in the top bar.
         </p>
